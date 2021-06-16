@@ -10,11 +10,39 @@ export class BellePasiScore extends LitElement {
   protected _isDragover: boolean = false;
 
   /**
+   * Selected file for analysis.
+   */
+  @state()
+  protected _selectedFilename: String = "";
+
+  /**
    * Initial caption.
    */
   @property({ attribute: 'uploader-caption', type: String })
   uploaderCaption = "Drop image here or click to select";
 
+  set isDragover(value) {
+    this._isDragover = value;
+  } 
+
+  /**
+   * Accessors
+   */
+  get isDragover() {
+    return this._isDragover;
+  }
+
+  set selectedFileName(fileName) {
+    this._selectedFilename = fileName;
+  } 
+
+  get selectedFilename() {
+    return this._selectedFilename;
+  }
+
+  /**
+   * CSS - HTML - Template
+   */
   static styles = css`
     .hidden {
       display: none;
@@ -75,35 +103,40 @@ export class BellePasiScore extends LitElement {
     `;
   }
 
-  set isDragover(value) {
-    this._isDragover = value;
-  } 
-
-  get isDragover() {
-    return this._isDragover;
-    this.getClassName();
-  }
-
-  getClassName() {
-    console.log(this.shadowRoot.getElementById("image-dragover").className);
-  }
-
+  /**
+   * Methods
+   */
   protected _imageDragOver(event) {
     event.preventDefault();
     event.stopPropagation();
 
-    this.isDragover = event.type === "dragover" ? true : false;
-
-    this.getClassName();
+    if (event.type.toLowerCase() === "dragover") {
+      this.isDragover = true;
+    } else {
+      this.isDragover = false;
+    }
   }
 
   protected _imageDrop(event) {
     this._imageDragOver(event);
-  
-    var files = event.target.files || event.dataTransfer.files;
-    for (var i = 0, file; (file = files[i]); i++) {
-      //this.previewFile(file);
+
+    // Catch the most probable file list
+    let fileList = event.target.files;
+    if (!fileList || fileList.length() == 0) {
+      fileList = event.dataTransfer.files;
     }
 
+    // Select and Show the first file available from the list
+    if (fileList && fileList.length > 0) {
+      for (let idx = 0, fileName; (fileName = fileList[idx]); idx++) {
+        if (fileName && fileName.length > 0) {
+          this.selectedFileName = fileName;
+          break;
+        }
+      }
+    }
+
+    // Show selected file
+    //this.showSelectedFile();
   }
 }
