@@ -13,7 +13,7 @@ export class BellePasiScore extends LitElement {
    * Selected file for analysis.
    */
   @state()
-  protected _selectedFilename: String = "";
+  protected _selectedFile: Blob = "";
 
   /**
    * Initial caption.
@@ -32,12 +32,12 @@ export class BellePasiScore extends LitElement {
     return this._isDragover;
   }
 
-  set selectedFileName(fileName) {
-    this._selectedFilename = fileName;
+  set selectedFile(file) {
+    this._selectedFile = file;
   } 
 
-  get selectedFilename() {
-    return this._selectedFilename;
+  get selectedFile() {
+    return this._selectedFile;
   }
 
   /**
@@ -97,7 +97,6 @@ export class BellePasiScore extends LitElement {
           @dragover=${this._imageDragOver} @dragleave=${this._imageDragOver} @drop=${this._imageDrop}>
     	    <div id="upload-caption">${this.uploaderCaption}</div>
     	      <img id="preview" class="hidden" />
-    	      <img id="url-preview" class="hidden" />
         </label>
       </div>
     `;
@@ -128,15 +127,29 @@ export class BellePasiScore extends LitElement {
 
     // Select and Show the first file available from the list
     if (fileList && fileList.length > 0) {
-      for (let idx = 0, fileName; (fileName = fileList[idx]); idx++) {
-        if (fileName && fileName.length > 0) {
-          this.selectedFileName = fileName;
+      for (let idx = 0, file; (file = fileList[idx]); idx++) {
+        if (file && file.name.length > 0 && file.size > 0) {
+          this.selectedFile = file;
           break;
         }
       }
     }
 
     // Show selected file
-    //this.showSelectedFile();
+    this.showSelectedFile();
+  }
+
+  protected showSelectedFile() {
+    if (this.selectedFile) {
+      let fileContent = new FileReader();
+
+      fileContent.readAsDataURL(this.selectedFile);
+      fileContent.onloadend = () => {
+        //this.show(this.imagePreview);
+        //this.hide(this.uploadCaption);
+  
+        //this.displayImage(reader.result, "image-preview");
+      };
+    }
   }
 }
