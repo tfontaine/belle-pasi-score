@@ -21,13 +21,13 @@ export class BellePasiScore extends LitElement {
   @property({ attribute: 'uploader-caption', type: String })
   uploaderCaption = "Drop image here or click to select";
 
-  set isDragover(value) {
-    this._isDragover = value;
-  } 
-
   /**
    * Accessors
    */
+  set isDragover(value) {
+    this._isDragover = value;
+  }
+  
   get isDragover() {
     return this._isDragover;
   }
