@@ -13,7 +13,7 @@ export class BellePasiScore extends LitElement {
    * Selected file for analysis.
    */
   @state()
-  protected _selectedFile: Blob = "";
+  protected _selectedFile: Blob = null;
 
   /**
    * Initial caption.
