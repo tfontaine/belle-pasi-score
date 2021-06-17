@@ -138,17 +138,23 @@ export class BellePasiScore extends LitElement {
     // Show selected file
     this.showSelectedFile();
   }
-
+ 
   protected showSelectedFile() {
     if (this.selectedFile) {
       let fileContent = new FileReader();
 
       fileContent.readAsDataURL(this.selectedFile);
       fileContent.onloadend = () => {
-        //this.show(this.imagePreview);
-        //this.hide(this.uploadCaption);
-  
-        //this.displayImage(reader.result, "image-preview");
+        let preview = <HTMLImageElement>this.shadowRoot.getElementById("preview");
+        if (preview) {
+          let uploadCaption = this.shadowRoot.getElementById("upload-caption");
+          if (uploadCaption) {
+            uploadCaption.classList.add("hidden");
+          }
+
+          preview.src = fileContent.result;
+          preview.classList.remove("hidden");
+        }
       };
     }
   }
