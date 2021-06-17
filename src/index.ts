@@ -117,11 +117,12 @@ export class BellePasiScore extends LitElement {
   }
 
   protected _imageDrop(event) {
+    console.log(event);
     this._imageDragOver(event);
 
     // Catch the most probable file list
     let fileList = event.target.files;
-    if (!fileList || fileList.length() == 0) {
+    if (!fileList || fileList.length == 0) {
       fileList = event.dataTransfer.files;
     }
 
