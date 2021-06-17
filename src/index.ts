@@ -10,11 +10,39 @@ export class BellePasiScore extends LitElement {
   protected _isDragover: boolean = false;
 
   /**
+   * Selected file for analysis.
+   */
+  @state()
+  protected _selectedFile: Blob = null;
+
+  /**
    * Initial caption.
    */
   @property({ attribute: 'uploader-caption', type: String })
   uploaderCaption = "Drop image here or click to select";
 
+  /**
+   * Accessors
+   */
+  set isDragover(value) {
+    this._isDragover = value;
+  }
+  
+  get isDragover() {
+    return this._isDragover;
+  }
+
+  set selectedFile(file) {
+    this._selectedFile = file;
+  } 
+
+  get selectedFile() {
+    return this._selectedFile;
+  }
+
+  /**
+   * CSS - HTML - Template
+   */
   static styles = css`
     .hidden {
       display: none;
@@ -69,41 +97,66 @@ export class BellePasiScore extends LitElement {
           @dragover=${this._imageDragOver} @dragleave=${this._imageDragOver} @drop=${this._imageDrop}>
     	    <div id="upload-caption">${this.uploaderCaption}</div>
     	      <img id="preview" class="hidden" />
-    	      <img id="url-preview" class="hidden" />
         </label>
       </div>
     `;
   }
 
-  set isDragover(value) {
-    this._isDragover = value;
-  } 
-
-  get isDragover() {
-    return this._isDragover;
-    this.getClassName();
-  }
-
-  getClassName() {
-    console.log(this.shadowRoot.getElementById("image-dragover").className);
-  }
-
+  /**
+   * Methods
+   */
   protected _imageDragOver(event) {
     event.preventDefault();
     event.stopPropagation();
 
-    this.isDragover = event.type === "dragover" ? true : false;
-
-    this.getClassName();
+    if (event.type.toLowerCase() === "dragover") {
+      this.isDragover = true;
+    } else {
+      this.isDragover = false;
+    }
   }
 
   protected _imageDrop(event) {
+    console.log(event);
     this._imageDragOver(event);
-  
-    var files = event.target.files || event.dataTransfer.files;
-    for (var i = 0, file; (file = files[i]); i++) {
-      //this.previewFile(file);
+
+    // Catch the most probable file list
+    let fileList = event.target.files;
+    if (!fileList || fileList.length == 0) {
+      fileList = event.dataTransfer.files;
     }
 
+    // Select and Show the first file available from the list
+    if (fileList && fileList.length > 0) {
+      for (let idx = 0, file; (file = fileList[idx]); idx++) {
+        if (file && file.name.length > 0 && file.size > 0) {
+          this.selectedFile = file;
+          break;
+        }
+      }
+    }
+
+    // Show selected file
+    this.showSelectedFile();
+  }
+ 
+  protected showSelectedFile() {
+    if (this.selectedFile) {
+      let fileContent = new FileReader();
+
+      fileContent.readAsDataURL(this.selectedFile);
+      fileContent.onloadend = () => {
+        let preview = <HTMLImageElement>this.shadowRoot.getElementById("preview");
+        if (preview) {
+          let uploadCaption = this.shadowRoot.getElementById("upload-caption");
+          if (uploadCaption) {
+            uploadCaption.classList.add("hidden");
+          }
+
+          preview.src = fileContent.result;
+          preview.classList.remove("hidden");
+        }
+      };
+    }
   }
 }
