@@ -22,6 +22,24 @@ export class BellePasiScore extends LitElement {
   uploaderCaption = "Drop image here or click to select";
 
   /**
+   * Link to uploader image.
+   */
+  @property({ attribute: 'uploader-background', type: String})
+  uploaderBackground = "http://localhost:8080/belle-pasi-score-uploader.jpg";
+
+  /**
+   * Initial height.
+   */
+  @property({ attribute: 'height', type: Number })
+  widgetHeight = 600;
+
+  /**
+   * Initial width.
+   */
+  @property({ attribute: 'width', type: Array })
+  widgetWidth = 100;
+
+  /**
    * Accessors
    */
   set isDragover(value) {
@@ -47,11 +65,9 @@ export class BellePasiScore extends LitElement {
     .hidden {
       display: none;
     }
-
     .reveal {
       opacity: 0;
     }
-
     .reveal:hover {
       opacity: 0.3;
     }
@@ -92,6 +108,7 @@ export class BellePasiScore extends LitElement {
   render() {
     return html`
       <div class="panel">
+        <img src=${this.uploaderBackground} height="600px" width="300px">
         <input id="image-uploader" class="hidden" type="file" accept="*" @change=${this._imageDrop} />
   	    <label for="image-uploader" id="image-dragover" class=${this.isDragover ? "uploader dragover" : "uploader"}
           @dragover=${this._imageDragOver} @dragleave=${this._imageDragOver} @drop=${this._imageDrop}>
@@ -138,7 +155,7 @@ export class BellePasiScore extends LitElement {
 
     // Show selected file
     this.showSelectedFile();
-  }
+  } 
  
   protected showSelectedFile() {
     if (this.selectedFile) {
@@ -153,7 +170,7 @@ export class BellePasiScore extends LitElement {
             uploadCaption.classList.add("hidden");
           }
 
-          preview.src = fileContent.result;
+          preview.src = fileContent.result.toString();
           preview.classList.remove("hidden");
         }
       };
