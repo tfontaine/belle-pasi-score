@@ -31,13 +31,13 @@ export class BellePasiScore extends LitElement {
    * Initial height.
    */
   @property({ attribute: 'height', type: Number })
-  widgetHeight = 600;
+  widgetHeight = 835;
 
   /**
    * Initial width.
    */
-  @property({ attribute: 'width', type: Array })
-  widgetWidth = 100;
+  @property({ attribute: 'width', type: Number })
+  widgetWidth = 373;
 
   /**
    * Accessors
@@ -117,7 +117,7 @@ export class BellePasiScore extends LitElement {
   render() {
     return html`
       <div class="panel">
-        <img src=${this.uploaderBackground} height="835px" width="373px" />
+        <img src=${this.uploaderBackground} height="${this.widgetHeight}px" width="${this.widgetWidth}px" />
         <input id="image-uploader" class="hidden" type="file" accept="*" @change=${this._imageDrop} />
   	    <label for="image-uploader" id="image-dragover" class=${this.isDragover ? "uploader dragover" : "uploader"}
           @dragover=${this._imageDragOver} @dragleave=${this._imageDragOver} @drop=${this._imageDrop}>
