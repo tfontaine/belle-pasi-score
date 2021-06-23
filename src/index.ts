@@ -16,12 +16,6 @@ export class BellePasiScore extends LitElement {
   protected _selectedFile: Blob = null;
 
   /**
-   * Initial caption.
-   */
-  @property({ attribute: 'uploader-caption', type: String })
-  uploaderCaption = "";
-
-  /**
    * Link to uploader image.
    */
   @property({ attribute: 'uploader-background', type: String})
@@ -40,7 +34,7 @@ export class BellePasiScore extends LitElement {
   widgetWidth = 374;
 
   /**
-   * Accessors
+   * _isDragover accessors
    */
   set isDragover(value) {
     this._isDragover = value;
@@ -50,6 +44,9 @@ export class BellePasiScore extends LitElement {
     return this._isDragover;
   }
 
+  /**
+   * _selectedFile accessors
+   */
   set selectedFile(file) {
     this._selectedFile = file;
   } 
@@ -117,19 +114,29 @@ export class BellePasiScore extends LitElement {
   render() {
     return html`
       <div class="panel">
-        <img src=${this.uploaderBackground} height="${this.widgetHeight}px" width="${this.widgetWidth}px" />
-        <input id="image-uploader" class="hidden" type="file" accept="*" @change=${this._imageDrop} />
-  	    <label for="image-uploader" id="image-dragover" class=${this.isDragover ? "uploader dragover" : "uploader"}
-          @dragover=${this._imageDragOver} @dragleave=${this._imageDragOver} @drop=${this._imageDrop}>
-          <div id="upload-caption">${this.uploaderCaption}</div>
-    	      <img id="preview" class="hidden" />
-        </label>
+        ${this.renderBackgroundImage()}
+        ${this.renderUploader()}
       </div>
     `;
   }
 
   /**
-   * Methods
+   * Rendering
+   */
+  protected renderBackgroundImage() {
+    return html`<img src=${this.uploaderBackground} height="${this.widgetHeight}px" width="${this.widgetWidth}px" />`;
+  }
+
+  protected renderUploader() {
+    return html`<input id="image-uploader" class="hidden" type="file" accept="*" @change=${this._imageDrop} />
+  	    <label for="image-uploader" id="image-dragover" class=${this.isDragover ? "uploader dragover" : "uploader"}
+          @dragover=${this._imageDragOver} @dragleave=${this._imageDragOver} @drop=${this._imageDrop}>
+    	    <img id="preview" class="hidden" />
+        </label>`;
+  }
+
+  /**
+   * Drag and drop logic
    */
   protected _imageDragOver(event) {
     event.preventDefault();
@@ -174,11 +181,6 @@ export class BellePasiScore extends LitElement {
       fileContent.onloadend = () => {
         let preview = <HTMLImageElement>this.shadowRoot.getElementById("preview");
         if (preview) {
-          let uploadCaption = this.shadowRoot.getElementById("upload-caption");
-          if (uploadCaption) {
-            uploadCaption.classList.add("hidden");
-          }
-
           preview.src = fileContent.result.toString();
           preview.classList.remove("hidden");
         }
