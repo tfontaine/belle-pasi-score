@@ -31,13 +31,13 @@ export class BellePasiScore extends LitElement {
    * Initial height.
    */
   @property({ attribute: 'height', type: Number })
-  widgetHeight = 835;
+  widgetHeight = 833;
 
   /**
    * Initial width.
    */
   @property({ attribute: 'width', type: Number })
-  widgetWidth = 373;
+  widgetWidth = 374;
 
   /**
    * Accessors
