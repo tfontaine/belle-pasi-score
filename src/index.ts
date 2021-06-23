@@ -16,10 +16,22 @@ export class BellePasiScore extends LitElement {
   protected _selectedFile: Blob = null;
 
   /**
+   * Indicates if analysis results are present or not.
+   */
+  @state()
+  protected _hasResults: boolean = false;
+ 
+  /**
    * Link to uploader image.
    */
   @property({ attribute: 'uploader-background', type: String})
   uploaderBackground = "http://localhost:8080/belle-pasi-score-uploader.jpg";
+
+  /**
+   * Link to analysis results image.
+   */
+  @property({ attribute: 'results-background', type: String})
+  resultsBackground = "http://localhost:8080/belle-pasi-score-results.jpg";
 
   /**
    * Initial height.
@@ -114,8 +126,7 @@ export class BellePasiScore extends LitElement {
   render() {
     return html`
       <div class="panel">
-        ${this.renderBackgroundImage()}
-        ${this.renderUploader()}
+        ${this.renderState()}
       </div>
     `;
   }
@@ -123,16 +134,28 @@ export class BellePasiScore extends LitElement {
   /**
    * Rendering
    */
-  protected renderBackgroundImage() {
+  protected renderState() {
+    if (this._hasResults) {
+      return this.renderResultsBackground();
+    } else {
+      return html`${this.renderUploaderBackground()}${this.renderUploader()}`;
+    }
+  }
+
+  protected renderUploaderBackground() {
     return html`<img src=${this.uploaderBackground} height="${this.widgetHeight}px" width="${this.widgetWidth}px" />`;
   }
 
   protected renderUploader() {
     return html`<input id="image-uploader" class="hidden" type="file" accept="*" @change=${this._imageDrop} />
-  	    <label for="image-uploader" id="image-dragover" class=${this.isDragover ? "uploader dragover" : "uploader"}
-          @dragover=${this._imageDragOver} @dragleave=${this._imageDragOver} @drop=${this._imageDrop}>
-    	    <img id="preview" class="hidden" />
+        <label for="image-uploader" id="image-dragover" class=${this.isDragover ? "uploader dragover" : "uploader"}
+            @dragover=${this._imageDragOver} @dragleave=${this._imageDragOver} @drop=${this._imageDrop}>
+          <img id="preview" class="hidden" />
         </label>`;
+  }
+
+  protected renderResultsBackground() {
+    return html`<img src=${this.resultsBackground} height="${this.widgetHeight}px" width="${this.widgetWidth}px" />`;    
   }
 
   /**
@@ -150,7 +173,6 @@ export class BellePasiScore extends LitElement {
   }
 
   protected _imageDrop(event) {
-    console.log(event);
     this._imageDragOver(event);
 
     // Catch the most probable file list
@@ -169,22 +191,75 @@ export class BellePasiScore extends LitElement {
       }
     }
 
-    // Show selected file
-    this.showSelectedFile();
-  } 
- 
-  protected showSelectedFile() {
+    // Exploit dropped file: show and analyse
     if (this.selectedFile) {
       let fileContent = new FileReader();
 
       fileContent.readAsDataURL(this.selectedFile);
       fileContent.onloadend = () => {
-        let preview = <HTMLImageElement>this.shadowRoot.getElementById("preview");
-        if (preview) {
-          preview.src = fileContent.result.toString();
-          preview.classList.remove("hidden");
-        }
+        // Show selected file
+        this.showSelectedFile(fileContent.result);
+
+        // Run the analysis
+        //this.runAnalysis(fileContent.result);
+        this.fakeRunAnalysis(fileContent.result);
       };
     }
+  } 
+ 
+  protected showSelectedFile(selectedPayload) {
+    let preview = <HTMLImageElement>this.shadowRoot.getElementById("preview");
+    if (preview) {
+      preview.src = selectedPayload.toString();
+      preview.classList.remove("hidden");
+    }
+  }
+
+  protected async runAnalysis(selectedPayload) {
+    try {
+      const response = await fetch("https://diseases.skinai.net/predict_torus", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(selectedPayload)
+        });
+
+      if (!response.ok) {
+        const message = `An error has occured: ${response.status}`;
+        console.log(message);
+
+        window.alert("Oops! Something went wrong.");
+      }
+    
+      const analysisResults = await response.json();
+      this.showResults(analysisResults);
+    } catch(error) {
+      console.log("An error occured", error.message);
+      window.alert("Oops! Something went wrong.");
+    }
+  }
+
+  protected showResults(resultPayload) {
+    this._hasResults = true;
+    window.alert(resultPayload);
+  }
+
+  /**
+   * Analysis and results simulation for debugging and integration purposes.
+   */
+  private delay(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  async fakeRunAnalysis(selectedPayload) {
+    await this.delay(3000);    
+
+    const data = {
+      "result1":"<p><b>Body part PASI score: 2.71</b>", 
+      "result2":"<p><b>Affected surface ratio: 35%</b><br><p><b>Lesion severity score: 4.2</b>"
+    };
+
+    this.showResults(data.result1 + "<br>" + data.result2);
   }
 }
