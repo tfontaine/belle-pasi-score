@@ -14,12 +14,24 @@ export class BellePasiScore extends LitElement {
    */
   @state()
   protected _selectedFile: Blob = null;
+
+  /**
+   * Indicates if analysis results are present or not.
+   */
+  @state()
+  protected _hasResults: boolean = false;
  
   /**
    * Link to uploader image.
    */
   @property({ attribute: 'uploader-background', type: String})
   uploaderBackground = "http://localhost:8080/belle-pasi-score-uploader.jpg";
+
+  /**
+   * Link to analysis results image.
+   */
+  @property({ attribute: 'results-background', type: String})
+  resultsBackground = "http://localhost:8080/belle-pasi-score-results.jpg";
 
   /**
    * Initial height.
@@ -114,8 +126,7 @@ export class BellePasiScore extends LitElement {
   render() {
     return html`
       <div class="panel">
-        ${this.renderBackgroundImage()}
-        ${this.renderUploader()}
+        ${this.renderState()}
       </div>
     `;
   }
@@ -123,7 +134,15 @@ export class BellePasiScore extends LitElement {
   /**
    * Rendering
    */
-  protected renderBackgroundImage() {
+  protected renderState() {
+    if (this._hasResults) {
+      this.renderResultsBackground();
+    } else {
+      return html`${this.renderUploaderBackground()}${this.renderUploader()}`;
+    }
+  }
+
+  protected renderUploaderBackground() {
     return html`<img src=${this.uploaderBackground} height="${this.widgetHeight}px" width="${this.widgetWidth}px" />`;
   }
 
@@ -133,6 +152,10 @@ export class BellePasiScore extends LitElement {
             @dragover=${this._imageDragOver} @dragleave=${this._imageDragOver} @drop=${this._imageDrop}>
           <img id="preview" class="hidden" />
         </label>`;
+  }
+
+  protected renderResultsBackground() {
+    return html`<img src=${this.resultsBackground} height="${this.widgetHeight}px" width="${this.widgetWidth}px" />`;    
   }
 
   /**
@@ -218,6 +241,7 @@ export class BellePasiScore extends LitElement {
   }
 
   protected showResults(resultPayload) {
+    this._hasResults = true;
     window.alert(resultPayload);
   }
 
