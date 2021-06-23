@@ -14,7 +14,7 @@ export class BellePasiScore extends LitElement {
    */
   @state()
   protected _selectedFile: Blob = null;
-
+ 
   /**
    * Link to uploader image.
    */
@@ -129,9 +129,9 @@ export class BellePasiScore extends LitElement {
 
   protected renderUploader() {
     return html`<input id="image-uploader" class="hidden" type="file" accept="*" @change=${this._imageDrop} />
-  	    <label for="image-uploader" id="image-dragover" class=${this.isDragover ? "uploader dragover" : "uploader"}
-          @dragover=${this._imageDragOver} @dragleave=${this._imageDragOver} @drop=${this._imageDrop}>
-    	    <img id="preview" class="hidden" />
+        <label for="image-uploader" id="image-dragover" class=${this.isDragover ? "uploader dragover" : "uploader"}
+            @dragover=${this._imageDragOver} @dragleave=${this._imageDragOver} @drop=${this._imageDrop}>
+          <img id="preview" class="hidden" />
         </label>`;
   }
 
@@ -150,7 +150,6 @@ export class BellePasiScore extends LitElement {
   }
 
   protected _imageDrop(event) {
-    console.log(event);
     this._imageDragOver(event);
 
     // Catch the most probable file list
@@ -169,22 +168,54 @@ export class BellePasiScore extends LitElement {
       }
     }
 
-    // Show selected file
-    this.showSelectedFile();
-  } 
- 
-  protected showSelectedFile() {
+    // Exploit dropped file: show and analyse
     if (this.selectedFile) {
       let fileContent = new FileReader();
 
       fileContent.readAsDataURL(this.selectedFile);
       fileContent.onloadend = () => {
-        let preview = <HTMLImageElement>this.shadowRoot.getElementById("preview");
-        if (preview) {
-          preview.src = fileContent.result.toString();
-          preview.classList.remove("hidden");
-        }
+        // Show selected file
+        this.showSelectedFile(fileContent.result);
+
+        // Run the analysis
+        this.runAnalysis(fileContent.result);
       };
     }
+  } 
+ 
+  protected showSelectedFile(selectedPayload) {
+    let preview = <HTMLImageElement>this.shadowRoot.getElementById("preview");
+    if (preview) {
+      preview.src = selectedPayload.toString();
+      preview.classList.remove("hidden");
+    }
+  }
+
+  protected async runAnalysis(selectedPayload) {
+    try {
+      const response = await fetch("https://diseases.skinai.net/predict_torus", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(selectedPayload)
+        });
+
+      if (!response.ok) {
+        const message = `An error has occured: ${response.status}`;
+        console.log(message);
+
+        window.alert("Oops! Something went wrong.");
+      }
+    
+      const analysisResults = await response.json();
+      this.showResults(analysisResults);
+    } catch(error) {
+      console.log("An error occured", error.message);
+      window.alert("Oops! Something went wrong.");
+    }
+  }
+
+  protected showResults(resultPayload) {
   }
 }
