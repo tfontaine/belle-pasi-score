@@ -136,7 +136,7 @@ export class BellePasiScore extends LitElement {
    */
   protected renderState() {
     if (this._hasResults) {
-      this.renderResultsBackground();
+      return this.renderResultsBackground();
     } else {
       return html`${this.renderUploaderBackground()}${this.renderUploader()}`;
     }
