@@ -178,7 +178,8 @@ export class BellePasiScore extends LitElement {
         this.showSelectedFile(fileContent.result);
 
         // Run the analysis
-        this.runAnalysis(fileContent.result);
+        //this.runAnalysis(fileContent.result);
+        this.fakeRunAnalysis(fileContent.result);
       };
     }
   } 
@@ -217,5 +218,24 @@ export class BellePasiScore extends LitElement {
   }
 
   protected showResults(resultPayload) {
+    window.alert(resultPayload);
+  }
+
+  /**
+   * Analysis and results simulation for debugging and integration purposes.
+   */
+  private delay(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  async fakeRunAnalysis(selectedPayload) {
+    await this.delay(3000);    
+
+    const data = {
+      "result1":"<p><b>Body part PASI score: 2.71</b>", 
+      "result2":"<p><b>Affected surface ratio: 35%</b><br><p><b>Lesion severity score: 4.2</b>"
+    };
+
+    this.showResults(data.result1 + "<br>" + data.result2);
   }
 }
