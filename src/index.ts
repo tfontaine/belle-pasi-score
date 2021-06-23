@@ -1,6 +1,14 @@
 import {html, css, LitElement} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
 
+enum BellePasiScoreState {
+  Quizz1,
+  Quizz2,
+  Quizz3,
+  Uploader,
+  Results
+}
+
 @customElement('belle-pasi-score')
 export class BellePasiScore extends LitElement {
   /**
@@ -19,19 +27,27 @@ export class BellePasiScore extends LitElement {
    * Indicates if analysis results are present or not.
    */
   @state()
-  protected _hasResults: boolean = false;
- 
+  protected _currentState: Number = BellePasiScoreState.Quizz1;
+
   /**
    * Link to uploader image.
    */
   @property({ attribute: 'uploader-background', type: String})
-  uploaderBackground = "http://localhost:8080/belle-pasi-score-uploader.jpg";
+  uploaderBackground = "http://localhost:8080/Resources/Widgets/PASI/belle-pasi-score-uploader.jpg";
 
   /**
    * Link to analysis results image.
    */
   @property({ attribute: 'results-background', type: String})
-  resultsBackground = "http://localhost:8080/belle-pasi-score-results.jpg";
+  resultsBackground = "http://localhost:8080/Resources/Widgets/PASI/belle-pasi-score-results.jpg";
+
+  /**
+   * Link to quizzs images.
+   */
+  @property({ attribute: 'quizzs-background', type: Array})
+  quizzsBackground = ["http://localhost:8080/Resources/Widgets/PASI/belle-pasi-score-gender.jpg",
+                      "http://localhost:8080/Resources/Widgets/PASI/belle-pasi-score-age.jpg",
+                      "http://localhost:8080/Resources/Widgets/PASI/belle-pasi-score-skin-tone.jpg"];
 
   /**
    * Initial height.
@@ -135,10 +151,19 @@ export class BellePasiScore extends LitElement {
    * Rendering
    */
   protected renderState() {
-    if (this._hasResults) {
-      return this.renderResultsBackground();
-    } else {
-      return html`${this.renderUploaderBackground()}${this.renderUploader()}`;
+    switch(this._currentState) {
+      case BellePasiScoreState.Quizz1:
+        return this.renderQuizz1();
+      case BellePasiScoreState.Quizz2:
+        return this.renderQuizz2();
+      case BellePasiScoreState.Quizz3:
+        return this.renderQuizz3();
+      case BellePasiScoreState.Uploader:
+        return html`${this.renderUploaderBackground()}${this.renderUploader()}`;
+      case BellePasiScoreState.Results:
+        return this.renderResultsBackground();
+      default:
+        return this.renderQuizz1();
     }
   }
 
@@ -156,6 +181,18 @@ export class BellePasiScore extends LitElement {
 
   protected renderResultsBackground() {
     return html`<img src=${this.resultsBackground} height="${this.widgetHeight}px" width="${this.widgetWidth}px" />`;    
+  }
+
+  protected renderQuizz1() {
+    return html`<img src=${this.quizzsBackground[BellePasiScoreState.Quizz1]} height="${this.widgetHeight}px" width="${this.widgetWidth}px" @click=${this._clickQuizz1} />`;
+  }
+
+  protected renderQuizz2() {
+    return html`<img src=${this.quizzsBackground[BellePasiScoreState.Quizz2]} height="${this.widgetHeight}px" width="${this.widgetWidth}px" @click=${this._clickQuizz2} />`;
+  }
+
+  protected renderQuizz3() {
+    return html`<img src=${this.quizzsBackground[BellePasiScoreState.Quizz3]} height="${this.widgetHeight}px" width="${this.widgetWidth}px" @click=${this._clickQuizz3} />`;
   }
 
   /**
@@ -241,7 +278,7 @@ export class BellePasiScore extends LitElement {
   }
 
   protected showResults(resultPayload) {
-    this._hasResults = true;
+    this._currentState = BellePasiScoreState.Results;;
     window.alert(resultPayload);
   }
 
@@ -261,5 +298,20 @@ export class BellePasiScore extends LitElement {
     };
 
     this.showResults(data.result1 + "<br>" + data.result2);
+  }
+
+  /**
+   * Quizzs logic
+   */
+  protected _clickQuizz1() {
+    this._currentState = BellePasiScoreState.Quizz2;
+  }
+
+  protected _clickQuizz2() {
+    this._currentState = BellePasiScoreState.Quizz3;
+  }
+
+  protected _clickQuizz3() {
+    this._currentState = BellePasiScoreState.Uploader;
   }
 }
